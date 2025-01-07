@@ -1,0 +1,11 @@
+Model Information:
+* title:	Parson's Table
+* source:	https://sketchfab.com/3d-models/parsons-table-c3fae288a3de45f89bee0d1bdfbfe675
+* author:	hardwood (https://sketchfab.com/hardwood)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Parson's Table" (https://sketchfab.com/3d-models/parsons-table-c3fae288a3de45f89bee0d1bdfbfe675) by hardwood (https://sketchfab.com/hardwood) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

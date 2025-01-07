@@ -1,0 +1,9 @@
+Using 3d models and animating them without knowladge of WebGL
+Graphics Processing
+Computer has to know position color and location of every vertex of an object.
+GPU can run simple calcuation in paralell
+WEB is JS Api for renderind 3d graphics in a web browser using GPU. WebGl provides a lanfuage to talk to the GPU and instruct it on what to render
+Api SPECTRUM   
+Specific(How much low level it is. more control over thinks at greter convenience)<===>Abstract()
+
+ThreeJs is build on top of WebGL
