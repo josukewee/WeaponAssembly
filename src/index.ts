@@ -11,7 +11,7 @@ interface Item {
   drop: () => void;
 }
 
-// creational pattern.
+// creational pattern. 
 // i want attachments: {name: string, properties: []}; to be {Attachments}
 
 class Weapon implements Item {
