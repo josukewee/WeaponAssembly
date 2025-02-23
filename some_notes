@@ -6,4 +6,18 @@ WEB is JS Api for renderind 3d graphics in a web browser using GPU. WebGl provid
 Api SPECTRUM   
 Specific(How much low level it is. more control over thinks at greter convenience)<===>Abstract()
 
+
+I AM THINKING OF.
+make the composite and leaf different classes. so if i would need to remove composite element, i would pass it down to descendents which will remove themselfs one by one.
+
 ThreeJs is build on top of WebGL
+
+composite object is an object made up of multipart parts(objects). Make the composite and the leafs behave uniformly. No need for checking if an element has children(less if statements), same implementation for all objects.
+
+
+If you want flexibility and simplicity, you could use a hybrid approach where:
+
+Use a Map to track how many slots each type has (Record<Specs["type"], number>).
+Remove the type completely when all slots are filled (like the List approach).
+Re-add the type when an attachment is removed.
+This combines the efficient lookup of a map with the automatic slot management of a list.
