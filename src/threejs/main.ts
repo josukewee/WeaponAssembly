@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { ModelManager } from './WeaponModelManager.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-
+import { WeaponConfigurationSystem } from './WeaponConfigurationSystem.js';
 
 const canvas = document.querySelector('canvas.threejs') as HTMLCanvasElement;
 
@@ -51,8 +51,8 @@ const controls = new OrbitControls(camera, renderer.domElement)
 
 // const loader = new GLTFLoader()
 
-const modelManager = new ModelManager(scene)
-modelManager.loadInitialModels()
+const main = new WeaponConfigurationSystem(camera, scene)
+main.init()
 
 // Load GLTF Model
 // loader.load(

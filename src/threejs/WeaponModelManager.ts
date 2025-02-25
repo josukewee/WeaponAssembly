@@ -7,6 +7,7 @@ class ModelManager {
     private scene: THREE.Scene; // Store the Three.js scene reference
     private loader: GLTFLoader;
     private textureLoader: THREE.TextureLoader;
+    private groundOffset?: number;
     
     constructor(scene: THREE.Scene) {
         this.textureLoader= new THREE.TextureLoader();
@@ -16,51 +17,48 @@ class ModelManager {
 
     public async loadInitialModels(): Promise<void> {
         // ground 
-        const groundGeometry = new THREE.PlaneGeometry(20, 20, 32, 32)
+        const groundGeometry = new THREE.PlaneGeometry(20, 20, 1, 32)
         groundGeometry.rotateX(-Math.PI/2)
         const groundMatretial = new THREE.MeshStandardMaterial({
             
-            color: 'blue',
+            color: 'white',
             side: THREE.DoubleSide
         })
         const groundMesh = new THREE.Mesh(groundGeometry, groundMatretial)
-
+        groundMesh.position.set(0, 0, 0)
         this.scene.add(groundMesh)
-        // loading table and ground
+        
         const table = await this.loadModel("/parsons_table/scene.gltf", "/parsons_table/textures/Walnut_diffuse.jpeg")
-        table.attach()
+        // boundindBox is a cool tool to attach some 
+        const boundingBox = new THREE.Box3().setFromObject(table);
+        const groundOffset = boundingBox.min.y; 
+
+        table.position.set(0, -groundOffset, 0)
+        this.scene.add(table)
+
     }
 
     public async loadModel(modelPath: string, texturePath?: string): Promise<THREE.Group> {
-        return new Promise((resolve, reject) => {
-
-            this.loader.load(
-                modelPath, (gltf) => {
-                    const content = gltf.scene
-                    if(texturePath) {
-                        const texture = this.textureLoader.load(texturePath)
-                        content.traverse((child) => {
-                            if(child instanceof THREE.Mesh) {
-                                child.material = new THREE.MeshStandardMaterial({
-                                    map: texture
-                                })
-
-                            }
-                        })
-                    }
-                    this.scene.add(content)
-                    resolve(content)
-                },
-                (xhr) => {
-                    console.log(`${(xhr.loaded / xhr.total) * 100}% loaded`)
-                },
-                (error) => {
-                    reject(error)
+        const content = await this.loader.loadAsync(modelPath, (xhr) => {
+            console.log(`${(xhr.loaded / xhr.total) * 100}% loaded`);
+        })
+        if(texturePath && content) {
+            const texture = await this.textureLoader.loadAsync(texturePath, (xhr) => {
+                console.log(`${(xhr.loaded / xhr.total) * 100}% loaded`);
+            })
+            content.scene.traverse((child) => {
+                if(child instanceof THREE.Mesh) {
+                    const newMaterial = texture.clone()
+                    child.material = new THREE.MeshStandardMaterial({
+                        map: newMaterial
+                    })
                 }
-            );
-        }
-    )};
 
+            })
+        }
+        return content.scene
+
+        };
     // Object3d.traverse(callback: function)
     // Recursive function to extract meaningful parts
     public extractParts(group: THREE.Group, parentName: string = ''): void {
@@ -106,6 +104,10 @@ class ModelManager {
     public processModel(): void {
 
     }
+    // if some ui recquires
+    // public getGroundOffset(): number | null { 
+    //     return this.groundOffset ?? null
+    // }
 }
 
 export {
