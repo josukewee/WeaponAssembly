@@ -69,7 +69,7 @@ class ModelManager {
             } else if (child instanceof THREE.Object3D) {
                 // If it's a mesh, store it as a usable part
                 if (this.isValidPart(child)) {
-                    this.extractedParts.push(child.clone());
+                    this.extractedParts?.push(child.clone());
                     console.log(`Extracted: ${child.name} from ${parentName}`);
                 }
             }

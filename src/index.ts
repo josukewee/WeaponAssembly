@@ -22,7 +22,7 @@ type WeaponPartCategory =
   | "Forward Assist"
   | "Upper Receiver"
   | "Lower Receiver";
-// Определяем тип для слотов компонентов
+
 type AttachmentSlots = Partial<Record<WeaponPartCategory, number>>;
 
 type Specs = {
@@ -33,9 +33,9 @@ type Specs = {
 };
 
 interface Item {
-  getStats(): WeaponStats;
-  getType(): Specs["type"];
-  getName(): string;
+  get Stats(): WeaponStats;
+  get Type(): Specs["type"];
+  get Name(): string;
   specs: Specs;
   drop: () => void;
 }
@@ -64,10 +64,11 @@ class Weapon implements Item {
     public specs: Specs
   ) {
     this.components = [root];
-    const rootStats = root.getStats();
+    const rootStats = root.Stats;
     this.initialStats = { ...rootStats };
   }
 
+  // need to handle the situation where the couple attachments are passed(will it already have right structure?)
   public add_attachment(att: AttachmentNode): Weapon {
     if (this.components.length === 0) {
       this.root = att;
@@ -76,37 +77,42 @@ class Weapon implements Item {
 
     const compatibleSlots = this.components.filter(
       (component) =>
-        component.compatibleAttachments[att.getType()] &&
-        component.compatibleAttachments[att.getType()]! > 0
+        component.compatibleAttachments[att.Type] &&
+        component.compatibleAttachments[att.Type]! > 0
     );
 
-    if (compatibleSlots.length === 0) {
-      console.log("No compatible slots found");
-      return this;
+    const chosenSlot = this.selectSlot(compatibleSlots, att)
+    if(chosenSlot) {
+        chosenSlot.addChild(att);
+        this.amplifier(att, true);
+    } else {
+        console.log(`${att.name} cannot be added to ${this.name}: No slots were found`)
+    }
+    return this;
     }
 
-    compatibleSlots[0].addChild(att);
-    this.amplifier(att, true);
-    return this;
-  }
+   private selectSlot(compatibleSlots: AttachmentNode[], att: AttachmentNode): AttachmentNode | null {
+    // this method returns the attachment to which we should add another, which is given\
+    // for the sake of simplicity adding to the very first filltered attachment
+    return compatibleSlots.length > 0 ? compatibleSlots[0] : null;
+    }
 
   public remove_attachment(att: AttachmentNode): Weapon {
     // Проверяем, является ли компонент корневым
     if (att === this.components[0]) {
-      console.log("Нельзя удалить базовый компонент оружия");
+      console.log("Root component cannot be deleted");
       return this;
     }
 
-    // Находим компонент и его родителя
     const componentToRemove = this.components.find((c) => c === att);
     if (!componentToRemove) {
-      console.log(`${att.getName()} не найден на оружии`);
+      console.log(`${att.Name} were not found on the ${this.name}`);
       return this;
     }
 
-    const parent = componentToRemove.getParent();
+    const parent = componentToRemove.Parent;
     if (!parent) {
-      console.log(`${att.getName()} не имеет родительского компонента`);
+      console.log(`${att.Name} не имеет родительского компонента`);
       return this;
     }
 
@@ -116,7 +122,7 @@ class Weapon implements Item {
       const getAllChildren = (node: AttachmentNode): AttachmentNode[] => {
         return [
           node,
-          ...node.getChildren().flatMap((child) => getAllChildren(child)),
+          ...node.Children.flatMap((child) => getAllChildren(child)),
         ];
       };
 
@@ -126,14 +132,14 @@ class Weapon implements Item {
         (c) => !removedNodes.includes(c as AttachmentNode)
       );
 
-      console.log(`${att.getName()} и все его модификации успешно удалены`);
+      console.log(`${att.Name} и все его модификации успешно удалены`);
     }
 
     return this;
   }
 
   private amplifier(att: AttachmentNode, isAdding: boolean): void {
-    const stats: WeaponStats = att.getStats();
+    const stats: WeaponStats = att.Stats;
     const multiplier: number = isAdding ? 1 : -1;
     Object.keys(stats).forEach((key) => {
       this.initialStats[key as keyof WeaponStats] +=
@@ -150,24 +156,12 @@ class Weapon implements Item {
     });
   }
 
-  public getStats(): WeaponStats {
+  public get Stats(): WeaponStats {
     return this.initialStats;
   }
 
-  public setComponents(
-    att: AttachmentNode | AttachmentNode[]
-  ): AttachmentNode[] {
-    const currentComponents = this.getComponents();
-    if (att instanceof AttachmentNode) {
-      currentComponents.push(att);
-    } else {
-      currentComponents.concat();
-    }
 
-    return currentComponents;
-  }
-
-  public getComponents(): AttachmentNode[] {
+  public get Components(): AttachmentNode[] {
     return this.components;
   }
 
@@ -176,15 +170,15 @@ class Weapon implements Item {
     return null;
   }
 
-  public getName(): string {
+  public get Name(): string {
     return this.name;
   }
-  getType(): Specs["type"] {
+  public get Type(): Specs["type"] {
     return this.specs.type;
   }
 
-  findNode(id: string): AttachmentNode | null {
-    return this.components[0].findAttachment((node) => node.getName() === id);
+  public findNode(id: string): AttachmentNode | null {
+    return this.components[0].findAttachment((node) => node.Name === id);
   }
 
   // Добавим метод для красивого вывода статов
@@ -216,20 +210,20 @@ class AttachmentNode implements Item {
     this.parent = parent;
   }
 
-  public getChildren(): AttachmentNode[] {
+  public get Children(): AttachmentNode[] {
     return this.children;
   }
 
-  public getParent(): AttachmentNode | null {
+  public get Parent(): AttachmentNode | null {
     return this.parent ? this.parent : null;
   }
 
-  public getStats(): WeaponStats {
+  public get Stats(): WeaponStats {
     // Комбинируем статы текущего компонента и всех дочерних
     let totalStats = { ...this.stats };
 
     this.children.forEach((child) => {
-      const childStats = child.getStats();
+      const childStats = child.Stats;
       totalStats.damage += childStats.damage;
       totalStats.accuracy += childStats.accuracy;
       totalStats.verticalRecoil += childStats.verticalRecoil;
@@ -240,11 +234,11 @@ class AttachmentNode implements Item {
     return totalStats;
   }
 
-  public getName(): string {
+  public get Name(): string {
     return this.name;
   }
 
-  public getType(): Specs["type"] {
+  public get Type(): Specs["type"] {
     return this.specs.type;
   }
 
@@ -413,14 +407,14 @@ abstract class WeaponFactory {
     internalParts.forEach((part) => upperReceiver.addChild(part));
 
     // Обновляем компоненты
-    weapon = this.getAllComponents(upperReceiver);
+   
     return weapon;
   }
 
   private getAllComponents(node: AttachmentNode): AttachmentNode[] {
     return [
       node,
-      ...node.getChildren().flatMap((child) => this.getAllComponents(child)),
+      ...node.Children.flatMap((child) => this.getAllComponents(child)),
     ];
   }
 }
