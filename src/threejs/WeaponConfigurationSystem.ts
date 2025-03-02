@@ -10,7 +10,8 @@ class WeaponConfigurationSystem {
     private interactionManager : InteractionManager;
     private modelManager: ModelManager;
     private highlightManager: HighlightManager
-    private weapon?: Weapon 
+    private weapon?: Weapon
+
     constructor(
        public camera: THREE.Camera,
        public scene: THREE.Scene
@@ -23,6 +24,7 @@ class WeaponConfigurationSystem {
     public init(): void {
         console.log("init")
         this.modelManager.loadInitialModels()
+        
     }
 }
 

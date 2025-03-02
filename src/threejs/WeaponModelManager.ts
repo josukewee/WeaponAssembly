@@ -7,7 +7,7 @@ class ModelManager {
     private scene: THREE.Scene; // Store the Three.js scene reference
     private loader: GLTFLoader;
     private textureLoader: THREE.TextureLoader;
-    private groundOffset?: number;
+    private groundOffset?: number = this.defineOffset();
     
     constructor(scene: THREE.Scene) {
         this.textureLoader= new THREE.TextureLoader();
@@ -15,8 +15,7 @@ class ModelManager {
         this.scene = scene;
     }
 
-    public async loadInitialModels(): Promise<void> {
-        // ground 
+    private async createGround(): Promise<THREE.Mesh> {
         const groundGeometry = new THREE.PlaneGeometry(20, 20, 1, 32)
         groundGeometry.rotateX(-Math.PI/2)
         const groundMatretial = new THREE.MeshStandardMaterial({
@@ -26,15 +25,34 @@ class ModelManager {
         })
         const groundMesh = new THREE.Mesh(groundGeometry, groundMatretial)
         groundMesh.position.set(0, 0, 0)
-        this.scene.add(groundMesh)
-        
-        const table = await this.loadModel("/parsons_table/scene.gltf", "/parsons_table/textures/Walnut_diffuse.jpeg")
-        // boundindBox is a cool tool to attach some 
-        const boundingBox = new THREE.Box3().setFromObject(table);
-        const groundOffset = boundingBox.min.y; 
+        return groundMesh;
+    }
 
-        table.position.set(0, -groundOffset, 0)
+    private defineOffset(model: THREE.Object3D, isMin: boolean): THREE.Vector3{
+        // axes helper(it;s like a tool to help orientate in the space)
+
+        const boundingBox = new THREE.Box3().setFromObject(model);
+        
+        return isMin ? boundingBox.min : boundingBox.max
+    }
+
+
+    
+
+    public async loadInitialModels(): Promise<void> {
+        // ground (resolved return the mesh itself)
+        const ground = await this.createGround();
+
+        const table = await this.loadModel("/parsons_table/scene.gltf", "/parsons_table/textures/Walnut_diffuse.jpeg")
+
+        const groundOffset = this.defineOffset(ground, true)
+
+        // boundindBox is a cool tool to attach some 
+        const axesHelper = new THREE.AxesHelper(10); // Adjust length as needed
+        table.position.set(0, -groundOffset.y, 0)
+        this.scene.add(ground)
         this.scene.add(table)
+        this.scene.add(axesHelper);
 
     }
 

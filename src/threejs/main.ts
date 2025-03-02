@@ -32,7 +32,7 @@ scene.add(directionalLight);
 //
 
 const controls = new OrbitControls(camera, renderer.domElement)
-
+console.log("every")
 // ground 
 // const groundGeometry = new THREE.PlaneGeometry(20, 20, 32, 32)
 // groundGeometry.rotateX(-Math.PI/2)
@@ -54,6 +54,8 @@ const controls = new OrbitControls(camera, renderer.domElement)
 const main = new WeaponConfigurationSystem(camera, scene)
 main.init()
 
+// const modelManager = new ModelManager(scene)
+// modelManager.loadInitialModels()
 // Load GLTF Model
 // loader.load(
 //     '/parsons_table/scene.gltf',
@@ -132,8 +134,22 @@ main.init()
 // const modelManger = new ModelManager(scene)
 // modelManger.loadModel("../AR15_custom_acog/AR15_custom_acog.gltf")
 
+// resizing and adopting the camera 
 
-animate()
+// function updateHUD() {
+//   camera.left = -window.innerWidth / window.innerHeight;
+//   camera.right = window.innerWidth / window.innerHeight;
+//   camera.top = 1;
+//   camera.bottom = -1;
+//   camera.updateProjectionMatrix();
+// }
+// window.addEventListener("resize", () => {
+//   camera.aspect = window.innerWidth / window.innerHeight;
+//   camera.updateProjectionMatrix();
+//   renderer.setSize(window.innerWidth, window.innerHeight);
+//   updateHUDPositionAndCamera();
+// });
+// animate()
 
 function animate () {
     requestAnimationFrame(animate)
