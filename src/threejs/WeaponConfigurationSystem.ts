@@ -7,10 +7,11 @@ import * as THREE from 'three';
 
 // facade that 
 class WeaponConfigurationSystem {
-    private interactionManager : InteractionManager;
+    public interactionManager : InteractionManager;
     private modelManager: ModelManager;
-    private highlightManager: HighlightManager
-    private weapon?: Weapon 
+    public highlightManager: HighlightManager
+    private weapon?: Weapon
+
     constructor(
        public camera: THREE.Camera,
        public scene: THREE.Scene
@@ -23,6 +24,7 @@ class WeaponConfigurationSystem {
     public init(): void {
         console.log("init")
         this.modelManager.loadInitialModels()
+        
     }
 }
 

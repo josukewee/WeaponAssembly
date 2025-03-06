@@ -13,19 +13,23 @@ class HighlightManager {
         });
     }
     
-    highlight(object: THREE.Object3D): void {
+    public highlight(object: THREE.Object3D): void {
         if (object instanceof THREE.Mesh) {
             this.originalMaterials.set(object, object.material);
             object.material = this.highlightMaterial;
         }
     }
     
-    clearHighlight(object: THREE.Object3D): void {
+    public clearHighlight(object: THREE.Object3D): void {
         const originalMaterial = this.originalMaterials.get(object);
         if (originalMaterial && object instanceof THREE.Mesh) {
             object.material = originalMaterial;
             this.originalMaterials.delete(object);
         }
+    }
+
+    public outline(object: THREE.Object3D): void {
+        
     }
 }
 

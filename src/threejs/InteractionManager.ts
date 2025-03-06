@@ -5,7 +5,7 @@ import { HighlightManager } from './HighlightManager.js';
 
 class InteractionManager {
     private raycaster: THREE.Raycaster;
-    private selectedPart: AttachmentNode | null = null;
+    private selectedPart: THREE.Mesh | null = null;
     
     constructor(
         private scene: THREE.Scene,
@@ -23,7 +23,7 @@ class InteractionManager {
         }
     }
     private onPartClicked(object: THREE.Object3D): void {
-        if (object instanceof AttachmentNode) {
+        if (object instanceof THREE.Mesh) {
             this.selectedPart = object;
             this.highlightManager.highlight(object);
         }
@@ -37,16 +37,15 @@ class InteractionManager {
         );
     }
 
-    private getIntersection(event: MouseEvent): THREE.Intersection | null {
+    private getIntersection(event: MouseEvent): THREE.Intersection | null   {
         const mouse = this.getMousePosition(event);
+        console.log(mouse)
         this.raycaster.setFromCamera(mouse, this.camera);
         const intersects = this.raycaster.intersectObjects(this.scene.children, true);
+        console.log(intersects[0].object)
         return intersects[0] || null;
     }
 
-    private outlineObject(intersection: THREE.Intersection): void {
-
-    }
 }
 
 export {

@@ -7,7 +7,7 @@ class ModelManager {
     private scene: THREE.Scene; // Store the Three.js scene reference
     private loader: GLTFLoader;
     private textureLoader: THREE.TextureLoader;
-    private groundOffset?: number;
+    private readonly groundOffset?: number;
     
     constructor(scene: THREE.Scene) {
         this.textureLoader= new THREE.TextureLoader();
@@ -15,8 +15,8 @@ class ModelManager {
         this.scene = scene;
     }
 
-    public async loadInitialModels(): Promise<void> {
-        // ground 
+    
+    private async createGround(): Promise<THREE.Mesh> {
         const groundGeometry = new THREE.PlaneGeometry(20, 20, 1, 32)
         groundGeometry.rotateX(-Math.PI/2)
         const groundMatretial = new THREE.MeshStandardMaterial({
@@ -26,17 +26,75 @@ class ModelManager {
         })
         const groundMesh = new THREE.Mesh(groundGeometry, groundMatretial)
         groundMesh.position.set(0, 0, 0)
-        this.scene.add(groundMesh)
+        return groundMesh;
+    }
+    
+    private getBoundingBox(model: THREE.Object3D): THREE.Box3 {
+        model.updateWorldMatrix(true, true); // Make sure transforms are applied
+        const boundingBox = new THREE.Box3().setFromObject(model); // Recalculate
+        boundingBox.applyMatrix4(model.matrixWorld); // Apply world transforms
+        return boundingBox;
+    }
+    // private defineOffset(model: THREE.Object3D, isMin: boolean): THREE.Vector3{
+    //     // axes helper(it;s like a tool to help orientate in the space)
+
+    //     const boundingBox = this.getBoundingBox(model);
         
-        const table = await this.loadModel("/parsons_table/scene.gltf", "/parsons_table/textures/Walnut_diffuse.jpeg")
+    //     return isMin ? boundingBox.min : boundingBox.max
+    // }
+
+    public async loadInitialModels(): Promise<void> {
+        // ground (resolved return the mesh itself)
+        const ground = await this.createGround();
+
+        const table = await this.loadModel("AR15_custom_acog/better_table.glb")
+
+        const ar15 = await this.loadModel("AR15_custom_acog/better_ar15_1.glb")
+
+        const groundOffset = this.getBoundingBox(ground).min.y
+        const tableOffset = this.getBoundingBox(table).max.y;
+        console.log(groundOffset)
+
+        const tableHight = groundOffset + tableOffset
+
+
+        // boxHelpers for better understanding
+        ar15.scale.set(0.01, 0.01, 0.01);
+        ar15.position.set(0, tableHight, -0.2);
+        // Поворачиваем модель
+        ar15.rotation.order = 'ZYX';
+        // ar15.rotation.x = Math.PI;
+        // ar15.rotation.y = Math.PI/2;
+        // ar15.rotation.z = Math.PI/2
+
         // boundindBox is a cool tool to attach some 
-        const boundingBox = new THREE.Box3().setFromObject(table);
-        const groundOffset = boundingBox.min.y; 
+         // Adjust length as needed
 
         table.position.set(0, -groundOffset, 0)
+
+        this.scene.add(ar15)
+        this.scene.add(ground)
         this.scene.add(table)
+    
 
     }
+
+    public inspectModel(model: THREE.Object3D): void {
+        model.traverse((child) => {
+            console.log(
+                `Name: ${child.name || "Unnamed"}`,
+                `Type: ${child.type}`,
+                `Position: ${child.position.toArray()}`,
+                `Visible: ${child.visible}`
+            );
+
+            if (child instanceof THREE.Mesh) {
+                console.log(`Geometry:`, child.geometry);
+                console.log(`Material:`, child.material);
+            }
+        });
+    }
+
 
     public async loadModel(modelPath: string, texturePath?: string): Promise<THREE.Group> {
         const content = await this.loader.loadAsync(modelPath, (xhr) => {
@@ -94,13 +152,12 @@ class ModelManager {
             part.rotation.x = 0;
             part.rotation.y = Math.PI/2;
             part.rotation.z = Math.PI/2; // Spread parts along the X-axis
-            this.scene.add(part); // ✅ Add the extracted part to the Three.js scene
+            this.scene.add(part); // Add the extracted part to the Three.js scene
             console.log(part)
             xOffset += 5; // Move each part further in the X-axis
         });
     }
 
-    // Call this method to process the model
     public processModel(): void {
 
     }

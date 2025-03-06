@@ -21,3 +21,33 @@ Use a Map to track how many slots each type has (Record<Specs["type"], number>).
 Remove the type completely when all slots are filled (like the List approach).
 Re-add the type when an attachment is removed.
 This combines the efficient lookup of a map with the automatic slot management of a list.
+
+
+1. Implemented logic for Attachments structure. Is it worth to have this class at all if THREE.Object3D has the same composite structure.
+
+
+// want to handle conditional parenting but the guns structure might not be that complex
+
++ Logic encapsulation
++ Custom traversal
++ Can store custom data without flooding the Object3D.userData
++ Represents the data structure of attachment and its hierarchical nature.
++ Represents a custom logic of adding and removing
+
+- Parallel tree managment(THREE.Object3D has the same hierarchical structure)
+- Each Mesh should be initialize as a AttachmentNode class(hard to maintain with complex gltf structure)
+- Sync problems. What is displayed can be diffrent from what is stored in structure
+
+
+2. If it is worth being there should it extend the THREE.Object3D class
+
++ Can differentiate AttachmentNode from Object3D
++ Direct integration into THREEJs. Can rewrite some logic of a parent class
++ Works with raycasting seamlessly. No need to maintain redundent treestructure
+
+- Complex Overrides:
+Overriding core methods (like add() or remove()) can be fragile — especially if future Three.js updates change how those methods work internally.
+- Encuspsulation problem
+- Synchronization problem. When performing same add and remove on the object. Parallel tree managment
+- Have to traverse the whole THREE.Group to initilize it children as some AttachmentNodes.
+- The more complex the logic, the harder it becomes to refactor or extend later.
