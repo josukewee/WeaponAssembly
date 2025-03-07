@@ -1,11 +1,66 @@
-import React, { useRef } from 'react'
+import React, { useRef, useEffect, useState } from 'react'
+import { useFrame, useThree } from '@react-three/fiber'
 import { useGLTF } from '@react-three/drei'
+import * as THREE from 'three'
 
 //https://gltf.pmnd.rs/
 
 export function AR15(props: any) {
   const { nodes, materials } = useGLTF('/ar-15-highcustom/ar-15-highcustom.gltf')
+  const [selectedObject, setSelectedObject ] = useState<THREE.Object3D | null>(null);
+  const { camera, scene, gl } = useThree();
+  const mouse = new THREE.Vector2()
+  const raycaster = new THREE.Raycaster()
 
+
+  const handleMouseMove = (event: MouseEvent):void => {
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+  }
+
+  const handleMouseClick = (event: MouseEvent):void => {
+    raycaster.setFromCamera(mouse, camera)
+
+    const intersects = raycaster.intersectObjects(scene.children)
+
+    if(intersects.length > 0) {
+      setSelectedObject(intersects[0].object)
+    } else {
+      setSelectedObject(null)
+    }
+  }
+
+  const handleMouseUp = (event: MouseEvent):void => {
+    setSelectedObject(null)
+  }
+
+  useEffect(() => {
+
+    const canvas = gl.domElement
+    canvas.addEventListener('click', handleMouseClick)
+    canvas.addEventListener('mousemove', handleMouseMove)
+    canvas.addEventListener('mouseup', handleMouseUp)
+
+    return () => {
+      canvas.removeEventListener('click', handleMouseClick)
+      canvas.removeEventListener('mousemove', handleMouseMove)
+      canvas.removeEventListener('mouseup', handleMouseUp)
+    }
+  }, [gl.domElement])
+
+  useFrame(() => {
+    if (selectedObject) {
+      
+      raycaster.setFromCamera(mouse, camera);
+      
+      const groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0); 
+      const intersection = new THREE.Vector3();
+      raycaster.ray.intersectPlane(groundPlane, intersection);
+
+      selectedObject.position.copy(intersection);
+    }
+  })
+  
   return (
 <group {...props} dispose={null}>
       <group scale={0.01}>
