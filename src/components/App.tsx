@@ -1,6 +1,6 @@
 import React from 'react';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls } from '@react-three/drei';
+import { DragControls, OrbitControls } from '@react-three/drei';
 import { PerspectiveCamera, Vector3 } from 'three';
 import { Ground } from './Ground.tsx';
 import { AR15 } from './AR15.tsx';
@@ -22,12 +22,19 @@ export default function App() {
       <OrbitControls 
         minAzimuthAngle={-Math.PI / 2} 
         maxAzimuthAngle={-Math.PI / 2}
+   
       />
       <ambientLight intensity={0.5} />
       <pointLight position={[10, 10, 10]} intensity={0.5} />
       <Ground />
       <Table></Table>
-      <AR15 position ={[-0.25, 0.74, 0]}/>
+        <DragControls>
+
+          <AR15 position ={[-0.25, 0.74, 0]}/>
+        </DragControls>
+          
+          
+      
     </Canvas>
   );
 }
