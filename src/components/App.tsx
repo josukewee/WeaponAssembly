@@ -19,7 +19,8 @@ export default function App() {
       far: 1000
   }}
     >
-      <OrbitControls 
+      <OrbitControls
+        makeDefault
         minAzimuthAngle={-Math.PI / 2} 
         maxAzimuthAngle={-Math.PI / 2}
    
